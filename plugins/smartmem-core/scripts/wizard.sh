@@ -109,8 +109,7 @@ PY
 }
 
 echo "smartmem wizard: project=$NAME type=$TYPE tier=$TIER hookMode=$HOOKMODE caveman=$CAVEMAN"
-apply_manifest "$PLUGIN_ROOT/templates/manifest.json" "$PLUGIN_ROOT/templates"
-
+# Overlay first so specialized files win over generic base (create-only semantics).
 if [ -n "$OVERLAY" ]; then
   OV_ROOT="$(dirname "$PLUGIN_ROOT")/smartmem-$OVERLAY/templates"
   if [ -d "$OV_ROOT" ]; then
@@ -119,6 +118,7 @@ if [ -n "$OVERLAY" ]; then
     echo "overlay not found: $OVERLAY"
   fi
 fi
+apply_manifest "$PLUGIN_ROOT/templates/manifest.json" "$PLUGIN_ROOT/templates"
 
 case "$CAVEMAN" in
   caveman-plugin) echo; echo "Caveman concise mode selected. Run:"; echo "  claude plugin marketplace add JuliusBrussee/caveman"; echo "  claude plugin install caveman@caveman" ;;

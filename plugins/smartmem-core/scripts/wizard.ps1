@@ -42,13 +42,16 @@ $vars = @{
 }
 
 function Render-String($s) {
+  if ($null -eq $s -or $s -eq '') { return '' }
   foreach ($k in $vars.Keys) { $s = $s.Replace($k, $vars[$k]) }
   return $s
 }
 
 function Apply-File($srcAbs, $dstAbs, $merge, $marker) {
   $exists = Test-Path $dstAbs
-  $content = Render-String (Get-Content $srcAbs -Raw)
+  $raw = Get-Content $srcAbs -Raw
+  if ($null -eq $raw) { $raw = '' }
+  $content = Render-String $raw
   $dstDir = Split-Path $dstAbs -Parent
   if ($dstDir -and -not (Test-Path $dstDir)) { New-Item -ItemType Directory -Force -Path $dstDir | Out-Null }
 
@@ -59,18 +62,20 @@ function Apply-File($srcAbs, $dstAbs, $merge, $marker) {
       Write-Host "wrote: $dstAbs"
     }
     'overwrite-runtime' {
-      if ($Update -and $exists) {
-        # merge JSON if both look like JSON
+      # On any re-run, preserve user-edited fields by merging: new template fields are added,
+      # existing fields keep the user's value (or new value if -Update was passed).
+      if ($exists) {
         try {
           $old = Get-Content $dstAbs -Raw | ConvertFrom-Json
           $new = $content | ConvertFrom-Json
           foreach ($p in $new.PSObject.Properties) {
             if (-not $old.PSObject.Properties[$p.Name]) {
               $old | Add-Member -NotePropertyName $p.Name -NotePropertyValue $p.Value
+            } elseif ($Update) {
+              $old.($p.Name) = $p.Value
             }
           }
-          $merged = $old | ConvertTo-Json -Depth 10
-          Set-Content -Path $dstAbs -Value $merged -Encoding UTF8
+          Set-Content -Path $dstAbs -Value ($old | ConvertTo-Json -Depth 10) -Encoding UTF8
           Write-Host "merged-runtime: $dstAbs"
           return
         } catch { }
@@ -81,12 +86,14 @@ function Apply-File($srcAbs, $dstAbs, $merge, $marker) {
     'prepend-once' {
       if ($exists) {
         $cur = Get-Content $dstAbs -Raw
+        if ($null -eq $cur) { $cur = '' }
         if ($cur -match [regex]::Escape($marker)) { Write-Host "skip (marker present): $dstAbs"; return }
         $block = "$marker`n$content`n<!-- smartmem:end -->`n`n"
         Set-Content -Path $dstAbs -Value ($block + $cur) -Encoding UTF8
         Write-Host "prepended: $dstAbs"
       } else {
-        Set-Content -Path $dstAbs -Value $content -Encoding UTF8
+        $block = "$marker`n$content`n<!-- smartmem:end -->`n"
+        Set-Content -Path $dstAbs -Value $block -Encoding UTF8
         Write-Host "wrote: $dstAbs"
       }
     }
@@ -147,8 +154,7 @@ function Apply-Manifest($manifestPath, $tplRoot) {
 
 # --- run ---
 Write-Host "smartmem wizard: project=$($cfg.name) type=$($cfg.type) tier=$tier hookMode=$($vars['{{hookMode}}']) caveman=$($vars['{{caveman}}'])"
-Apply-Manifest (Join-Path $pluginRoot 'templates/manifest.json') (Join-Path $pluginRoot 'templates')
-
+# Overlay first so specialized files (e.g. software-library system_patterns.md) win over generic base.
 if ($Overlay) {
   $overlayRoot = Join-Path (Split-Path $pluginRoot -Parent) "smartmem-$Overlay/templates"
   if (Test-Path $overlayRoot) {
@@ -157,6 +163,7 @@ if ($Overlay) {
     Write-Host "overlay not found: $Overlay (looked at $overlayRoot)"
   }
 }
+Apply-Manifest (Join-Path $pluginRoot 'templates/manifest.json') (Join-Path $pluginRoot 'templates')
 
 # --- caveman handling ---
 switch ($vars['{{caveman}}']) {
