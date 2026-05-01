@@ -1,0 +1,19 @@
+﻿{
+  "version": "0.1.0",
+  "projectName": "smartmem",
+  "projectType": "software-library",
+  "modelTier": "balanced",
+  "models": {
+    "memoryFinalizer": "haiku",
+    "taskTracker":    "haiku",
+    "explorer":       "sonnet",
+    "planner":        "opus",
+    "reviewer":       "sonnet"
+  },
+  "hookMode": "full",
+  "caveman": "off",
+  "memoryLanguage": "en",
+  "languages": [],
+  "createdAt": "2026-05-01"
+}
+

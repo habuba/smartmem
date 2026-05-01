@@ -1,0 +1,19 @@
+﻿{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit(memory/**)",
+      "Write(memory/**)",
+      "Edit(docs/**)",
+      "Write(docs/**)",
+      "Edit(.claude/smartmem/**)",
+      "Write(.claude/smartmem/**)"
+    ]
+  },
+  "env": {
+    "SMARTMEM_VERSION": "0.1.0"
+  }
+}
+
