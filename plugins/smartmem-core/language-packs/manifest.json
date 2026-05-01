@@ -1,0 +1,10 @@
+{
+  "languages": [
+    { "id": "python",     "label": "Python",     "skills": ["python-style", "python-testing"], "lsp": "pyright (or pylsp)", "mcp": ["mcp-server-language-server (python)"], "tools": ["ruff", "mypy", "pytest"] },
+    { "id": "typescript", "label": "TypeScript", "skills": ["typescript-style", "typescript-testing"], "lsp": "typescript-language-server", "mcp": ["mcp-server-language-server (ts)"], "tools": ["eslint", "prettier", "vitest|jest"] },
+    { "id": "go",         "label": "Go",         "skills": ["go-style"], "lsp": "gopls", "mcp": ["mcp-server-language-server (go)"], "tools": ["golangci-lint", "go test"] },
+    { "id": "rust",       "label": "Rust",       "skills": ["rust-style"], "lsp": "rust-analyzer", "mcp": [], "tools": ["clippy", "cargo test", "cargo fmt"] },
+    { "id": "java",       "label": "Java",       "skills": ["java-style"], "lsp": "jdtls (eclipse.jdt.ls)", "mcp": [], "tools": ["spotbugs", "junit", "maven|gradle"] },
+    { "id": "csharp",     "label": "C#/.NET",    "skills": ["csharp-style"], "lsp": "OmniSharp / csharp-ls", "mcp": [], "tools": ["dotnet test", "dotnet format"] }
+  ]
+}

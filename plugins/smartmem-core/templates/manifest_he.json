@@ -1,0 +1,35 @@
+{
+  "files": [
+    { "src": "_base_he/CLAUDE.md.tmpl",                    "dst": "CLAUDE.md",                                 "merge": "prepend-once",  "marker": "<!-- smartmem:start -->" },
+
+    { "src": "_base_he/memory/MEMORY.md",                  "dst": "memory/MEMORY.md",                          "merge": "create-only" },
+    { "src": "_base_he/memory/project_brief.md",           "dst": "memory/project_brief.md",                   "merge": "create-only" },
+    { "src": "_base_he/memory/product_context.md",         "dst": "memory/product_context.md",                 "merge": "create-only" },
+    { "src": "_base_he/memory/design_goals.md",            "dst": "memory/design_goals.md",                    "merge": "create-only" },
+    { "src": "_base_he/memory/system_requirements.md",     "dst": "memory/system_requirements.md",             "merge": "create-only" },
+    { "src": "_base_he/memory/glossary.md",                "dst": "memory/glossary.md",                        "merge": "create-only" },
+    { "src": "_base_he/memory/architecture.md",            "dst": "memory/architecture.md",                    "merge": "create-only" },
+    { "src": "_base_he/memory/code_structure.md",          "dst": "memory/code_structure.md",                  "merge": "create-only" },
+    { "src": "_base_he/memory/system_patterns.md",         "dst": "memory/system_patterns.md",                 "merge": "create-only" },
+    { "src": "_base_he/memory/tech_context.md",            "dst": "memory/tech_context.md",                    "merge": "create-only" },
+    { "src": "_base_he/memory/db_structure.md",            "dst": "memory/db_structure.md",                    "merge": "create-only" },
+    { "src": "_base_he/memory/ui_structure.md",            "dst": "memory/ui_structure.md",                    "merge": "create-only" },
+    { "src": "_base_he/memory/api_surface.md",             "dst": "memory/api_surface.md",                     "merge": "create-only" },
+    { "src": "_base_he/memory/active_context.md",          "dst": "memory/active_context.md",                  "merge": "create-only" },
+    { "src": "_base_he/memory/tasks.md",                   "dst": "memory/tasks.md",                           "merge": "create-only" },
+    { "src": "_base_he/memory/progress.md",                "dst": "memory/progress.md",                        "merge": "create-only" },
+    { "src": "_base_he/memory/commands.md",                "dst": "memory/commands.md",                        "merge": "create-only" },
+    { "src": "_base_he/memory/decisions.md",               "dst": "memory/decisions.md",                       "merge": "create-only" },
+
+    { "src": "_base_he/docs/BIG_PICTURE.md",               "dst": "docs/BIG_PICTURE.md",                       "merge": "create-only" },
+    { "src": "_base_he/docs/DECISIONS.md",                 "dst": "docs/DECISIONS.md",                         "merge": "create-only" },
+    { "src": "_base_he/docs/CHANGELOG.md",                 "dst": "docs/CHANGELOG.md",                         "merge": "create-only" },
+    { "src": "_base_he/docs/BACKLOG.md",                   "dst": "docs/BACKLOG.md",                           "merge": "create-only" },
+
+    { "src": "_base/.claude/smartmem/v1/config.json.tmpl", "dst": ".claude/smartmem/v1/config.json",           "merge": "overwrite-runtime" },
+    { "src": "_base/.claude/smartmem/v1/active_context.md","dst": ".claude/smartmem/v1/active_context.md",     "merge": "create-only" },
+    { "src": "_base/.claude/smartmem/v1/event-log.jsonl",  "dst": ".claude/smartmem/v1/event-log.jsonl",       "merge": "create-only" },
+    { "src": "_base/.claude/settings.json.tmpl",           "dst": ".claude/settings.json",                     "merge": "json-merge" },
+    { "src": "_base/.gitignore.tmpl",                      "dst": ".gitignore",                                "merge": "append-once",   "marker": "# smartmem" }
+  ]
+}

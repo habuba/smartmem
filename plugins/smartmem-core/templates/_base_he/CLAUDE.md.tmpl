@@ -1,0 +1,19 @@
+# {{name}}
+
+{{description}}
+
+## מצביעי זיכרון
+@memory/MEMORY.md
+@memory/active_context.md
+@memory/tasks.md
+
+## כללי עבודה
+- ניהול הזיכרון נעשה על ידי הסוכן `memory-finalizer`. סוכנים אחרים פולטים בלוקים `MEMORY_NOTES:`; רק ה-finalizer כותב ל-`memory/*.md`, `.claude/smartmem/**` או `docs/{DECISIONS,CHANGELOG,BACKLOG}.md`.
+- לפני שינויים לא טריוויאליים, יש לקרוא את המצביעים הרלוונטיים מ-`memory/MEMORY.md`:
+  - נגיעה בארכיטקטורה ← `architecture.md`, `code_structure.md`
+  - נגיעה ב-DB ← `db_structure.md`
+  - נגיעה ב-UI ← `ui_structure.md`
+  - נגיעה ב-API ← `api_surface.md`
+  - כל קוד ← `system_patterns.md`, `tech_context.md`
+- זרימת עבודה לפיצ׳רים: `/prd <slug>` ← `/tasks <slug>` ← `/process` (משתמש ב-`planner` לתכנון, `reviewer` לפני קומיט).
+- מצב ריצה חם נמצא תחת `.claude/smartmem/v1/` (לא נכלל ב-git).

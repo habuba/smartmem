@@ -23,12 +23,14 @@ PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 TODAY="$(date +%Y-%m-%d)"
 
 # parse config via python (universally available enough for our targets)
-read NAME DESCRIPTION TYPE TIER HOOKMODE CAVEMAN < <(python3 - <<PY
+read NAME DESCRIPTION TYPE TIER HOOKMODE CAVEMAN MEMLANG < <(python3 - <<PY
 import json,sys
 c=json.loads('''$CONFIG''')
-print(c.get('name',''), c.get('description',''), c.get('type',''), c.get('modelTier','balanced'), c.get('hookMode','full'), c.get('caveman','off'))
+print(c.get('name',''), c.get('description',''), c.get('type',''), c.get('modelTier','balanced'), c.get('hookMode','full'), c.get('caveman','off'), c.get('memoryLanguage','en'))
 PY
 )
+BASE_MANIFEST="templates/manifest.json"
+[ "$MEMLANG" = "he" ] && BASE_MANIFEST="templates/manifest_he.json"
 
 case "$TIER" in
   frugal)  M_FIN=haiku;  M_TT=haiku;  M_EXP=haiku;  M_PLAN=haiku;  M_REV=haiku ;;
@@ -44,6 +46,7 @@ render() {
       -e "s|{{modelTier}}|$TIER|g" \
       -e "s|{{hookMode}}|$HOOKMODE|g" \
       -e "s|{{caveman}}|$CAVEMAN|g" \
+      -e "s|{{memoryLanguage}}|$MEMLANG|g" \
       -e "s|{{MODEL_FINALIZER}}|$M_FIN|g" \
       -e "s|{{MODEL_TASK_TRACKER}}|$M_TT|g" \
       -e "s|{{MODEL_EXPLORER}}|$M_EXP|g" \
@@ -108,7 +111,7 @@ PY
   done
 }
 
-echo "smartmem wizard: project=$NAME type=$TYPE tier=$TIER hookMode=$HOOKMODE caveman=$CAVEMAN"
+echo "smartmem wizard: project=$NAME type=$TYPE tier=$TIER hookMode=$HOOKMODE caveman=$CAVEMAN memoryLang=$MEMLANG"
 # Overlay first so specialized files win over generic base (create-only semantics).
 if [ -n "$OVERLAY" ]; then
   OV_ROOT="$(dirname "$PLUGIN_ROOT")/smartmem-$OVERLAY/templates"
@@ -118,7 +121,7 @@ if [ -n "$OVERLAY" ]; then
     echo "overlay not found: $OVERLAY"
   fi
 fi
-apply_manifest "$PLUGIN_ROOT/templates/manifest.json" "$PLUGIN_ROOT/templates"
+apply_manifest "$PLUGIN_ROOT/$BASE_MANIFEST" "$PLUGIN_ROOT/templates"
 
 case "$CAVEMAN" in
   caveman-plugin) echo; echo "Caveman concise mode selected. Run:"; echo "  claude plugin marketplace add JuliusBrussee/caveman"; echo "  claude plugin install caveman@caveman" ;;

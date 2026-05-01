@@ -32,7 +32,10 @@ Use the AskUserQuestion tool for each. Save answers as you go.
    - premium: all sonnet+ (planner=opus)
 5. **hookMode** — `off` / `guard` / `full` (recommended)
 6. **Caveman concise mode** — `caveman-plugin` / `our-concise` / `off`
-7. **MCP servers to register** — optional list, can skip
+7. **Memory language** — `en` (recommended, default) / `he` / other.
+   **Important UX note:** strongly recommend keeping memory in English even if the user is chatting with Claude in another language. English memory files are ~30-50% fewer tokens than equivalent Hebrew/Arabic/CJK content, and Claude reasons equally well over English memory regardless of conversation language. Surface this trade-off in the question's description.
+8. **Install language pack now?** — yes/no. If yes, after the wizard completes, automatically invoke the `smartmem-lang-init` skill.
+9. **MCP servers to register** — optional list, can skip
 
 ## Step 3 — render
 

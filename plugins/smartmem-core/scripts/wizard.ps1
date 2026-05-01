@@ -153,8 +153,13 @@ function Apply-Manifest($manifestPath, $tplRoot) {
 }
 
 # --- run ---
-Write-Host "smartmem wizard: project=$($cfg.name) type=$($cfg.type) tier=$tier hookMode=$($vars['{{hookMode}}']) caveman=$($vars['{{caveman}}'])"
-# Overlay first so specialized files (e.g. software-library system_patterns.md) win over generic base.
+# Memory language: 'en' (default) uses _base; 'he' uses _base_he. Recommend keeping 'en' even if chatting in another language — saves tokens.
+$memLang = if ($cfg.memoryLanguage) { [string]$cfg.memoryLanguage } else { 'en' }
+$baseManifest = if ($memLang -eq 'he') { 'templates/manifest_he.json' } else { 'templates/manifest.json' }
+$vars['{{memoryLanguage}}'] = $memLang
+
+Write-Host "smartmem wizard: project=$($cfg.name) type=$($cfg.type) tier=$tier hookMode=$($vars['{{hookMode}}']) caveman=$($vars['{{caveman}}']) memoryLang=$memLang"
+# Overlay first so specialized files win over generic base.
 if ($Overlay) {
   $overlayRoot = Join-Path (Split-Path $pluginRoot -Parent) "smartmem-$Overlay/templates"
   if (Test-Path $overlayRoot) {
@@ -163,7 +168,7 @@ if ($Overlay) {
     Write-Host "overlay not found: $Overlay (looked at $overlayRoot)"
   }
 }
-Apply-Manifest (Join-Path $pluginRoot 'templates/manifest.json') (Join-Path $pluginRoot 'templates')
+Apply-Manifest (Join-Path $pluginRoot $baseManifest) (Join-Path $pluginRoot 'templates')
 
 # --- caveman handling ---
 switch ($vars['{{caveman}}']) {
