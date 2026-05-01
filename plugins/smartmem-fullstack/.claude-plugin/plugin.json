@@ -1,0 +1,6 @@
+{
+  "name": "smartmem-fullstack",
+  "version": "0.1.0",
+  "description": "Overlay for fullstack web projects. Adds frontend/ and backend/ sub-CLAUDE.md, api_context.md, and a UI-smoketest skill. Requires smartmem-core.",
+  "dependencies": ["smartmem-core"]
+}

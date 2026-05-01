@@ -1,0 +1,9 @@
+{
+  "files": [
+    { "src": "frontend/CLAUDE.md", "dst": "frontend/CLAUDE.md", "merge": "create-only" },
+    { "src": "backend/CLAUDE.md",  "dst": "backend/CLAUDE.md",  "merge": "create-only" },
+    { "src": "memory/api_context.md",      "dst": "memory/api_context.md",      "merge": "create-only" },
+    { "src": "memory/frontend_context.md", "dst": "memory/frontend_context.md", "merge": "create-only" },
+    { "src": "memory/system_patterns.md",  "dst": "memory/system_patterns.md",  "merge": "create-only" }
+  ]
+}

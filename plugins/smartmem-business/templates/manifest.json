@@ -1,0 +1,7 @@
+{
+  "files": [
+    { "src": "memory/stakeholders.md", "dst": "memory/stakeholders.md", "merge": "create-only" },
+    { "src": "memory/processes.md",    "dst": "memory/processes.md",    "merge": "create-only" },
+    { "src": "memory/slas.md",         "dst": "memory/slas.md",         "merge": "create-only" }
+  ]
+}

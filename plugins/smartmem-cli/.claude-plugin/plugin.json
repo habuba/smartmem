@@ -1,0 +1,6 @@
+{
+  "name": "smartmem-cli",
+  "version": "0.1.0",
+  "description": "Overlay for CLI tool projects. Adds argparse patterns, distribution rules. Requires smartmem-core.",
+  "dependencies": ["smartmem-core"]
+}

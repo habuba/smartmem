@@ -1,0 +1,6 @@
+{
+  "files": [
+    { "src": "memory/system_patterns.md", "dst": "memory/system_patterns.md", "merge": "create-only" },
+    { "src": "memory/tech_context.md",    "dst": "memory/tech_context.md",    "merge": "create-only" }
+  ]
+}

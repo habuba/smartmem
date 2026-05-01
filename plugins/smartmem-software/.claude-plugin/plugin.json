@@ -1,0 +1,6 @@
+{
+  "name": "smartmem-software",
+  "version": "0.1.0",
+  "description": "Overlay for software-library projects. Adds lint/test/release patterns and a test-author skill. Requires smartmem-core.",
+  "dependencies": ["smartmem-core"]
+}

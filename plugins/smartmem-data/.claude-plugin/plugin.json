@@ -1,0 +1,6 @@
+{
+  "name": "smartmem-data",
+  "version": "0.1.0",
+  "description": "Overlay for data/ML projects. Adds datasets.md, experiments.md, model_registry.md. Requires smartmem-core.",
+  "dependencies": ["smartmem-core"]
+}

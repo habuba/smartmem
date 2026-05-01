@@ -1,0 +1,6 @@
+{
+  "name": "smartmem-business",
+  "version": "0.1.0",
+  "description": "Overlay for business-workflow projects (non-code). Adds stakeholders.md, slas.md, processes.md. Requires smartmem-core.",
+  "dependencies": ["smartmem-core"]
+}

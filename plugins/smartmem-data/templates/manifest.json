@@ -1,0 +1,7 @@
+{
+  "files": [
+    { "src": "memory/datasets.md",       "dst": "memory/datasets.md",       "merge": "create-only" },
+    { "src": "memory/experiments.md",    "dst": "memory/experiments.md",    "merge": "create-only" },
+    { "src": "memory/model_registry.md", "dst": "memory/model_registry.md", "merge": "create-only" }
+  ]
+}

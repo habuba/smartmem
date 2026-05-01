@@ -1,0 +1,11 @@
+# smartmem runtime
+.claude/smartmem/v1/event-log.jsonl
+.claude/smartmem/v1/runs/
+.claude/settings.local.json
+CLAUDE.local.md
+
+# editor
+.vscode/
+.idea/
+*.swp
+.DS_Store

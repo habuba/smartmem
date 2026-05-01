@@ -1,0 +1,14 @@
+# {{name}}
+
+{{description}}
+
+## Memory pointers
+@memory/MEMORY.md
+@memory/active_context.md
+@memory/tasks.md
+
+## Working rules
+- Memory is managed by the `memory-finalizer` agent. Other agents emit `MEMORY_NOTES:` blocks; only the finalizer writes to `memory/*.md`, `.claude/smartmem/**`, or `docs/{DECISIONS,CHANGELOG,BACKLOG}.md`.
+- Read `memory/system_patterns.md` and `memory/tech_context.md` before non-trivial changes.
+- Workflow for features: `/prd <slug>` → `/tasks <slug>` → `/process` (uses `planner` for design, `reviewer` before commit).
+- Hot runtime state lives under `.claude/smartmem/v1/` (gitignored).

@@ -1,0 +1,14 @@
+{
+  "name": "smartmem",
+  "description": "Hierarchical smart memory + harness initializer for Claude Code projects.",
+  "version": "0.1.0",
+  "owner": { "name": "smartmem" },
+  "plugins": [
+    { "name": "smartmem-core",       "source": "./plugins/smartmem-core",       "description": "Base memory schema, finalizer agent, hooks, wizard, slash commands." },
+    { "name": "smartmem-software",   "source": "./plugins/smartmem-software",   "description": "Overlay: software library projects (lint/test/release)." },
+    { "name": "smartmem-fullstack",  "source": "./plugins/smartmem-fullstack",  "description": "Overlay: fullstack web (frontend + backend, sub-CLAUDE.md per layer)." },
+    { "name": "smartmem-business",   "source": "./plugins/smartmem-business",   "description": "Overlay: business workflow (process docs, stakeholders, SLAs)." },
+    { "name": "smartmem-data",       "source": "./plugins/smartmem-data",       "description": "Overlay: data/ML (datasets, experiments, model registry)." },
+    { "name": "smartmem-cli",        "source": "./plugins/smartmem-cli",        "description": "Overlay: CLI tool projects." }
+  ]
+}
