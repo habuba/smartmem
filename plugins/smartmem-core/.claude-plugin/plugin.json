@@ -1,6 +1,6 @@
 {
   "name": "smartmem-core",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Hierarchical smart memory + harness for Claude Code. Provides memory-finalizer agent, compaction-survival hooks, PRD/tasks/process workflow, and an interactive init wizard.",
   "author": "smartmem",
   "license": "MIT"

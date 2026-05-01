@@ -23,14 +23,16 @@ PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 TODAY="$(date +%Y-%m-%d)"
 
 # parse config via python (universally available enough for our targets)
-read NAME DESCRIPTION TYPE TIER HOOKMODE CAVEMAN MEMLANG < <(python3 - <<PY
+read NAME DESCRIPTION TYPE TIER HOOKMODE CAVEMAN MEMLANG AUTOMEM < <(python3 - <<PY
 import json,sys
 c=json.loads('''$CONFIG''')
-print(c.get('name',''), c.get('description',''), c.get('type',''), c.get('modelTier','balanced'), c.get('hookMode','full'), c.get('caveman','off'), c.get('memoryLanguage','en'))
+print(c.get('name',''), c.get('description',''), c.get('type',''), c.get('modelTier','balanced'), c.get('hookMode','full'), c.get('caveman','off'), c.get('memoryLanguage','en'), c.get('autoMemory','keep'))
 PY
 )
 BASE_MANIFEST="templates/manifest.json"
 [ "$MEMLANG" = "he" ] && BASE_MANIFEST="templates/manifest_he.json"
+AUTOMEM_ENABLED="true"
+[ "$AUTOMEM" = "off" ] && AUTOMEM_ENABLED="false"
 
 case "$TIER" in
   frugal)  M_FIN=haiku;  M_TT=haiku;  M_EXP=haiku;  M_PLAN=haiku;  M_REV=haiku ;;
@@ -47,6 +49,8 @@ render() {
       -e "s|{{hookMode}}|$HOOKMODE|g" \
       -e "s|{{caveman}}|$CAVEMAN|g" \
       -e "s|{{memoryLanguage}}|$MEMLANG|g" \
+      -e "s|{{autoMemory}}|$AUTOMEM|g" \
+      -e "s|{{autoMemoryEnabled}}|$AUTOMEM_ENABLED|g" \
       -e "s|{{MODEL_FINALIZER}}|$M_FIN|g" \
       -e "s|{{MODEL_TASK_TRACKER}}|$M_TT|g" \
       -e "s|{{MODEL_EXPLORER}}|$M_EXP|g" \

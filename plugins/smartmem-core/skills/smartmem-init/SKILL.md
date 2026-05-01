@@ -33,9 +33,15 @@ Use the AskUserQuestion tool for each. Save answers as you go.
 5. **hookMode** — `off` / `guard` / `full` (recommended)
 6. **Caveman concise mode** — `caveman-plugin` / `our-concise` / `off`
 7. **Memory language** — `en` (recommended, default) / `he` / other.
-   **Important UX note:** strongly recommend keeping memory in English even if the user is chatting with Claude in another language. English memory files are ~30-50% fewer tokens than equivalent Hebrew/Arabic/CJK content, and Claude reasons equally well over English memory regardless of conversation language. Surface this trade-off in the question's description.
-8. **Install language pack now?** — yes/no. If yes, after the wizard completes, automatically invoke the `smartmem-lang-init` skill.
-9. **MCP servers to register** — optional list, can skip
+   **Important UX note:** strongly recommend keeping memory in English even if the user is chatting with Claude in another language. English memory files are ~30-50% fewer tokens than equivalent Hebrew/Arabic/CJK content, and Claude reasons equally well over English memory regardless of conversation language.
+8. **Auto-memory** — `keep` (default, recommended) / `off` / `mirror`.
+   Claude Code has its own machine-local auto-memory at `~/.claude/projects/<git-root>/memory/MEMORY.md`. Two systems can coexist:
+   - `keep`: leave Claude's auto-memory on. smartmem owns team-shared durable; auto-memory keeps per-machine learning.
+   - `off`: writes `autoMemoryEnabled: false` into `.claude/settings.json` so Claude won't read/write auto-memory in this repo.
+   - `mirror`: (experimental) finalizer reads auto-memory on each pass and promotes team-shareable facts (build commands, decisions) into smartmem.
+   See `docs/guide/09-auto-memory.md`.
+9. **Install language pack now?** — yes/no. If yes, after the wizard completes, automatically invoke `smartmem-lang-init`.
+10. **MCP servers to register** — optional list, can skip
 
 ## Step 3 — render
 

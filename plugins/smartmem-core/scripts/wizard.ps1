@@ -158,6 +158,11 @@ $memLang = if ($cfg.memoryLanguage) { [string]$cfg.memoryLanguage } else { 'en' 
 $baseManifest = if ($memLang -eq 'he') { 'templates/manifest_he.json' } else { 'templates/manifest.json' }
 $vars['{{memoryLanguage}}'] = $memLang
 
+# autoMemory: keep (default) | off (sets autoMemoryEnabled:false) | mirror (finalizer reads auto-memory)
+$autoMem = if ($cfg.autoMemory) { [string]$cfg.autoMemory } else { 'keep' }
+$vars['{{autoMemory}}'] = $autoMem
+$vars['{{autoMemoryEnabled}}'] = if ($autoMem -eq 'off') { 'false' } else { 'true' }
+
 Write-Host "smartmem wizard: project=$($cfg.name) type=$($cfg.type) tier=$tier hookMode=$($vars['{{hookMode}}']) caveman=$($vars['{{caveman}}']) memoryLang=$memLang"
 # Overlay first so specialized files win over generic base.
 if ($Overlay) {

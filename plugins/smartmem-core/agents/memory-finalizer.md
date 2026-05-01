@@ -12,6 +12,7 @@ You are the single writer for project memory. All other agents emit `MEMORY_NOTE
 2. `.claude/smartmem/v1/active_context.md` (current focus)
 3. `memory/MEMORY.md` (index)
 4. Any pointer files referenced by the index relevant to the notes.
+5. **If `.claude/smartmem/v1/config.json` has `autoMemory: "mirror"`**: also read Claude Code's auto-memory at `~/.claude/projects/<git-root>/memory/MEMORY.md`. Promote any *team-shareable* facts (decisions, patterns, build commands) into the matching smartmem file. Leave per-machine notes (debugging trails, user preferences) alone — those belong only in auto-memory.
 
 ## Routing rules — where each note goes
 - Task state changes → `memory/tasks.md` (or `.claude/smartmem/v1/tasks.md` if hot tier)

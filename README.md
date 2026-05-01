@@ -90,6 +90,7 @@ That's it.
 | [Language packs](docs/guide/06-language-packs.md) | python/ts/go/rust/java/csharp + LSP via MCP |
 | [Troubleshooting](docs/guide/07-troubleshooting.md) | install / wizard / hooks / memory issues |
 | [Publishing](docs/guide/08-publishing.md) | fork & ship your own marketplace |
+| [smartmem ↔ Claude Code auto-memory](docs/guide/09-auto-memory.md) | how the two coexist |
 | [תיעוד בעברית](docs/he/README.md) | Hebrew documentation |
 
 ## Memory language note
