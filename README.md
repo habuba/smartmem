@@ -69,7 +69,7 @@ Restart Claude Code after install.
 ```
 cd <your-project>
 claude
-> /smartmem-init                    # 9-question wizard
+> /smartmem-init                    # 10-question wizard
 > /smartmem-lang-init               # pick languages → installs style skills + tech_context
 > /prd magic-link "passwordless login"
 > /tasks magic-link

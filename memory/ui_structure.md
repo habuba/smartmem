@@ -1,32 +1,5 @@
-﻿# UI structure
+# UI structure — smartmem
 
-_(Skip if this project has no UI.)_
+**N/A** — smartmem has no UI. The user interface is Claude Code itself: slash commands (`/smartmem-init`, `/status`, `/prd`, etc.), skills invoked via natural language, and the wizard's `AskUserQuestion` prompts.
 
-## Component tree
-```
-App
-â”œâ”€â”€ Layout
-â”‚   â””â”€â”€ ...
-â””â”€â”€ Routes
-    â””â”€â”€ ...
-```
-
-## Design system
-- Library:
-- Tokens (colors / spacing / typography): _(link or list)_
-- Icon set:
-
-## Routing
-- Style: file-based / config-based
-- Top-level routes:
-
-## State
-- Client state:
-- Server state:
-- Cache invalidation:
-
-## Accessibility baseline
-- Keyboard nav:
-- Screen-reader:
-- Color contrast target:
-
+If a future feature ships a UI (e.g. a memory dashboard webview), this file should describe its component tree, design system, routing, state, and accessibility baseline per the standard `ui_structure.md` template.

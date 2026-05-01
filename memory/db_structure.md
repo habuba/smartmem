@@ -1,24 +1,14 @@
-﻿# DB structure
+# DB structure — smartmem
 
-_(Skip if this project has no database.)_
+**N/A** — smartmem has no database. State lives in plain markdown and JSON files on disk:
 
-## Engine
-- _(Postgres / MySQL / SQLite / Mongo / DynamoDB / etc.)_
+- Durable memory: `<project>/memory/*.md` (committed)
+- Durable docs: `<project>/docs/*.md` (committed)
+- Runtime state: `<project>/.claude/smartmem/v1/{config.json, active_context.md, event-log.jsonl}` (gitignored)
 
-## Tables / collections
-| Name | Purpose | Key indexes |
-|---|---|---|
-|  |  |  |
+Event log format (`event-log.jsonl`):
+```json
+{"ts": "2026-05-01T12:34:56Z", "agent": "memory-finalizer", "wrote": ["memory/decisions.md"], "notes_count": 3}
+```
 
-## Relationships
-- _(FK graph or one-paragraph description)_
-
-## Migrations
-- Tool:
-- Location:
-- Naming convention:
-
-## Performance notes
-- Hot tables / queries:
-- Known N+1 risks:
-
+If a future feature needs an actual database (e.g. cross-machine sync), this file should be updated with engine, schema, migration tool, and conventions per the standard `db_structure.md` template.

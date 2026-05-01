@@ -16,6 +16,7 @@
 6. [חבילות שפה](06-language-packs.md)
 7. [פתרון בעיות](07-troubleshooting.md)
 8. [פרסום fork משלכם](08-publishing.md)
+9. [smartmem ↔ Claude Code auto-memory](09-auto-memory.md)
 
 ---
 

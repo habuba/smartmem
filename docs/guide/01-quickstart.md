@@ -39,7 +39,7 @@ claude plugin list
 /smartmem-init
 ```
 
-You'll be asked **9 questions** — see the [wizard reference](02-wizard.md). The default answers are sensible; you can press **Enter** through most of them.
+You'll be asked **10 questions** — see the [wizard reference](02-wizard.md). The default answers are sensible; you can press **Enter** through most of them.
 
 After the wizard you should see:
 

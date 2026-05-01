@@ -13,8 +13,9 @@
 | 5 | מצב hooks | `full` | `off` / `guard` (בטיחות בלבד) / `full` |
 | 6 | Caveman תמציתי | `off` | `caveman-plugin` / `our-concise` / `off` |
 | 7 | שפת זיכרון | `en` | `en` / `he` / אחר. **מומלץ להשאיר `en` גם כשמשוחחים בשפה אחרת — חוסך 30%-50% tokens.** |
-| 8 | להתקין חבילת שפה עכשיו | `no` | אם כן, יריץ `/smartmem-lang-init` אחרי ה-wizard |
-| 9 | שרתי MCP | (דלג) | רשימה אופציונלית |
+| 8 | Auto-memory | `keep` | `keep` / `off` / `mirror`. ראו [auto-memory](09-auto-memory.md). |
+| 9 | להתקין חבילת שפה עכשיו | `no` | אם כן, יריץ `/smartmem-lang-init` אחרי ה-wizard |
+| 10 | שרתי MCP | (דלג) | רשימה אופציונלית |
 
 ## רמות מודל
 
@@ -33,6 +34,18 @@
 | `off` | כלום | אתם רוצים אפס קסם אוטומטי; `/memory-sync` ידני |
 | `guard` | block-secrets, PreCompact בלבד | רשת ביטחון בלי finalizer אוטומטי |
 | `full` | + finalizer ב-Stop, סיכום ב-SessionStart, audit ב-SubagentStop, טעינה מחדש ב-PostCompact | **ברירת מחדל**. זיכרון היררכי race-free |
+
+## Auto-memory
+
+נשמר ב-`config.json` בשדה `autoMemory`. שלושה ערכים:
+
+| ערך | התנהגות |
+|---|---|
+| `keep` (ברירת מחדל) | auto-memory המובנית של Claude Code ב-`~/.claude/projects/<git-root>/memory/` נשארת דלוקה. שתי השכבות מתקיימות. |
+| `off` | ה-wizard כותב `autoMemoryEnabled: false` ל-`.claude/settings.json`. Claude לא יקרא/יכתוב auto-memory ב-repo הזה. |
+| `mirror` | ניסיוני. ה-finalizer קורא את auto-memory וממפה את העובדות הרלוונטיות ל-smartmem. |
+
+הסבר מלא: [smartmem ↔ auto-memory](09-auto-memory.md).
 
 ## שפת זיכרון
 

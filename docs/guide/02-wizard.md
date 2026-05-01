@@ -13,8 +13,9 @@ The wizard runs the first time you invoke `/smartmem-init` in a project. Re-runn
 | 5 | Hook mode | `full` | `off` / `guard` (safety only) / `full` |
 | 6 | Caveman concise | `off` | `caveman-plugin` / `our-concise` / `off` |
 | 7 | Memory language | `en` | `en` / `he` / other. **Recommend keeping `en` even when chatting in another language — saves 30-50% tokens.** |
-| 8 | Install language pack now | `no` | If yes, runs `/smartmem-lang-init` after the wizard |
-| 9 | MCP servers | (skip) | optional list |
+| 8 | Auto-memory | `keep` | `keep` / `off` / `mirror`. See [auto-memory doc](09-auto-memory.md). |
+| 9 | Install language pack now | `no` | If yes, runs `/smartmem-lang-init` after the wizard |
+| 10 | MCP servers | (skip) | optional list |
 
 ## Model tiers
 
@@ -33,6 +34,18 @@ You can edit `.claude/smartmem/v1/config.json` later to override per-agent.
 | `off` | nothing | You want zero auto-magic; fully manual `/memory-sync` |
 | `guard` | block-secrets, PreCompact only | Safety net but no auto-finalizer |
 | `full` | + auto-finalizer on Stop, SessionStart briefing, SubagentStop audit, PostCompact reload | **Default**. Race-free hierarchical memory |
+
+## Auto-memory
+
+Stored as `config.json` `autoMemory`. Three values:
+
+| Value | Behavior |
+|---|---|
+| `keep` (default) | Claude Code's built-in auto-memory at `~/.claude/projects/<git-root>/memory/` stays on. smartmem and auto-memory coexist. |
+| `off` | Wizard writes `autoMemoryEnabled: false` into `.claude/settings.json`. Claude won't read/write auto-memory for this repo. |
+| `mirror` | Experimental. Finalizer reads auto-memory each pass and promotes team-shareable facts into smartmem. |
+
+Full explanation: [smartmem ↔ auto-memory](09-auto-memory.md).
 
 ## Memory language
 
