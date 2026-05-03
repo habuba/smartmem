@@ -3,17 +3,13 @@
 {{description}}
 
 ## Memory pointers
-@memory/MEMORY.md
-@memory/active_context.md
-@memory/tasks.md
+{{memoryImports}}
 
 ## Working rules
-- Memory is managed by the `memory-finalizer` agent. Other agents emit `MEMORY_NOTES:` blocks; only the finalizer writes to `memory/*.md`, `.claude/smartmem/**`, or `docs/{DECISIONS,CHANGELOG,BACKLOG}.md`.
-- Before non-trivial changes, read the relevant pointers from `memory/MEMORY.md`:
-  - touching architecture → `architecture.md`, `code_structure.md`
-  - touching DB → `db_structure.md`
-  - touching UI → `ui_structure.md`
-  - touching API surface → `api_surface.md`
-  - any code → `system_patterns.md`, `tech_context.md`
-- Workflow for features: `/prd <slug>` → `/tasks <slug>` → `/process` (uses `planner` for design, `reviewer` before commit).
-- Hot runtime state lives under `.claude/smartmem/v1/` (gitignored).
+- Be concise. No preamble, no trailing summaries, no marketing tone, no emojis.
+- Hierarchical memory: read `memory/MEMORY.md` first, then `@`-import only the files relevant to the task.
+- Memory updates: {{updateModeRule}}
+- Only `memory-finalizer` writes to `memory/**`, `.claude/smartmem/**`, or `docs/{DECISIONS,CHANGELOG,BACKLOG}.md`. Other agents append `MEMORY_NOTES:` blocks to `.claude/smartmem/v1/scratch.md`.
+- Add or remove memory files with `/memory-files add|remove|rename|list`.
+- Non-trivial features: `/prd <slug>` → `/tasks <slug>` → `/process`.
+- Hot runtime state under `.claude/smartmem/v1/` (gitignored).

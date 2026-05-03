@@ -1,22 +1,20 @@
 # smartmem
 
-Source repo for the **smartmem** plugin family — hierarchical memory + harness initializer for Claude Code. This repo dogfoods itself: it uses the same memory schema it ships.
+Source repo for the **smartmem** plugin family — hierarchical memory + harness initializer for Claude Code. This repo dogfoods itself.
 
 ## Memory pointers
 @memory/MEMORY.md
 @memory/active_context.md
 @memory/tasks.md
-@docs/BIG_PICTURE.md
 
 ## Working rules
-- This repo IS smartmem. When extending it, the changes you make ship as the next plugin version. Update `docs/CHANGELOG.md` and bump versions when relevant.
-- Memory is managed by the `memory-finalizer` agent. Other agents emit `MEMORY_NOTES:` blocks; only the finalizer writes to `memory/*.md`, `.claude/smartmem/**`, or `docs/{DECISIONS,CHANGELOG,BACKLOG}.md`.
-- Keep this file <80 lines. Detail goes into pointer files imported above.
-- Namespace all runtime state under `.claude/smartmem/v1/`.
-- Don't claim generic command names (BUILD/PLAN/REVIEW/DEBUG); coexist with cc10x.
-- Before non-trivial changes, read the relevant pointer from `memory/MEMORY.md`:
-  - templates → `memory/code_structure.md` (look at `plugins/smartmem-*/templates/`)
-  - wizard logic → `plugins/smartmem-core/scripts/wizard.{ps1,sh}` and `memory/architecture.md`
-  - new memory file → update both `_base/manifest.json` and `_base/memory/MEMORY.md`
-  - new project type → use the `/smartmem-new-template` skill rather than copying by hand
-- Workflow for features: `/prd <slug>` → `/tasks <slug>` → `/process`.
+- Be concise. No preamble, no trailing summaries, no marketing tone, no emojis.
+- Hierarchical memory: read `memory/MEMORY.md` first, then `@`-import only files relevant to the task.
+- Memory updates: automatic — `memory-finalizer` runs on Stop and PreCompact, applying scratch notes without prompting.
+- Only `memory-finalizer` writes to `memory/**`, `.claude/smartmem/**`, or `docs/{DECISIONS,CHANGELOG,BACKLOG}.md`. Other agents append `MEMORY_NOTES:` blocks to `.claude/smartmem/v1/scratch.md`.
+- Add or remove memory files with `/memory-files add|remove|rename|list`.
+- Non-trivial features: `/prd <slug>` → `/tasks <slug>` → `/process`.
+- Hot runtime state under `.claude/smartmem/v1/` (gitignored).
+- This repo IS smartmem — descriptive memory files are intentionally near-empty stubs. Filled examples live in `samples/` (10 disciplines).
+- Changes here ship as the next plugin version. Update `docs/CHANGELOG.md` and bump `plugins/smartmem-core/.claude-plugin/plugin.json` when relevant.
+- Don't claim generic command names (BUILD/PLAN/REVIEW); coexist with cc10x.

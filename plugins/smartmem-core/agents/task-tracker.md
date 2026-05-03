@@ -26,4 +26,4 @@ You manage `memory/tasks.md`. Schema (markdown checklist with stable IDs):
 ## Output
 Return a one-line confirmation: `T-007 added` / `T-003 done` / etc.
 
-When emitting `MEMORY_NOTES:`, include the operation so memory-finalizer can mirror to `.claude/smartmem/v1/tasks.md` if hot-tier mirroring is enabled.
+task-tracker is the one exception to the single-writer rule: it edits `memory/tasks.md` directly because every operation is small and well-typed. It does NOT write anywhere else. For non-task signal, append a `MEMORY_NOTES:` block to `.claude/smartmem/v1/scratch.md` instead.

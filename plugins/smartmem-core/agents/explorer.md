@@ -9,4 +9,4 @@ Fast read-only search. Before searching, read `memory/system_patterns.md` and `m
 
 Report file paths with `path:line` format. Quote ≤5 lines per match. End with a one-line takeaway.
 
-Emit at most 1 `MEMORY_NOTES:` block if you discover a new convention worth recording.
+If you discover a new convention worth recording, append at most one `MEMORY_NOTES:` block to `.claude/smartmem/v1/scratch.md`. Never write to `memory/**` directly.

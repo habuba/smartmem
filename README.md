@@ -4,7 +4,7 @@
 
 [English docs](docs/guide/01-quickstart.md) · [תיעוד בעברית](docs/he/README.md)
 
-One command (`/smartmem-init`) gets any project from empty to fully-instrumented in under a minute: 18 split memory files, a single-writer memory-finalizer agent, compaction-survival hooks, a `/prd → /tasks → /process` workflow, project-type overlays, and per-language packs (Python, TypeScript, Go, Rust, Java, C#).
+One command (`/smartmem-init`) gets any project from empty to fully-instrumented in under a minute. The wizard asks you which memory files you want — files start as empty stubs and grow as you work. A single-writer `memory-finalizer` agent distills session notes into the right file (auto on Stop/PreCompact, or manual via `/memory-sync`). 10 filled examples across disciplines live under [`samples/`](samples/).
 
 ```
 empty dir   ─┐
@@ -16,10 +16,11 @@ project   ─┘
 
 Most Claude Code projects either have no memory file at all, or they have a 500-line `CLAUDE.md` that gets stale instantly. smartmem ships:
 
-- A **fixed schema of 18 small focused memory files** — `architecture`, `code_structure`, `db_structure`, `ui_structure`, `api_surface`, `design_goals`, `system_requirements`, `system_patterns`, `tech_context`, `tasks`, `progress`, `decisions`, etc. — instead of one giant blob.
-- A **single-writer `memory-finalizer` agent** so memory updates are race-free across subagents.
-- **PreCompact + PostCompact hooks** so nothing is lost when context compacts.
-- A **wizard** that picks a project type, model tier, hook mode, caveman concise mode, and **memory language** (default English even when chatting in another language — saves 30-50% tokens).
+- **A picked-not-prescribed file set** of focused memory files — `architecture`, `code_structure`, `db_structure`, `system_patterns`, `tech_context`, etc. — instead of one giant blob. Defaults seed by project type; you adjust with `/memory-files`.
+- **Empty by default**. Files start as `# Title` + purpose stub; the `memory-finalizer` agent (the sole writer) fills them as you work. No content is pre-fabricated.
+- **Two update modes**: `auto` (finalizer runs on Stop and PreCompact silently) or `manual` (finalizer proposes diff, you approve before writing).
+- **Compaction-survival hooks** (`PreCompact` + `PostCompact`) so nothing is lost when context compacts.
+- **A wizard** that picks project type, file set, update mode, model tier, hook mode, caveman concise mode, and memory language (default English even when chatting in another language — saves 30-50% tokens).
 - **Per-language packs** with style/testing skills, toolchain notes, and MCP-LSP suggestions.
 
 ## What's in the box
@@ -29,11 +30,12 @@ Most Claude Code projects either have no memory file at all, or they have a 500-
 | **6 plugins** | `smartmem-core` + 5 overlays: `software`, `fullstack`, `business`, `data`, `cli` |
 | **5 subagents** | `memory-finalizer` (sole writer), `task-tracker`, `explorer`, `planner`, `reviewer` |
 | **5 skills** | `smartmem-init`, `smartmem-new-template`, `smartmem-lang-init`, `karpathy-guidelines`, `concise` |
-| **10 slash commands** | `/status`, `/prd`, `/tasks`, `/process`, `/memory-sync`, `/memory-rotate`, `/task`, `/save-command`, `/caveman`, `/project-update` |
+| **11 slash commands** | `/status`, `/prd`, `/tasks`, `/process`, `/memory-sync`, `/memory-rotate`, `/memory-files`, `/task`, `/save-command`, `/caveman`, `/project-update` |
 | **6 hooks** | `SessionStart`, `PreCompact`, `PostCompact`, `Stop`, `SubagentStop`, `PreToolUse` (block-secrets) |
 | **6 language packs** | python, typescript, go, rust, java, csharp |
 | **2 memory languages** | English (default), Hebrew (עברית) |
-| **18 memory files** | see [memory schema](docs/guide/03-memory-schema.md) |
+| **18 known memory files** | optional, picked at init or with `/memory-files add`; custom names also work. See [memory schema](docs/guide/03-memory-schema.md) |
+| **10 sample projects** | filled examples in [`samples/`](samples/) across data/CLI/web/services/ML/mobile/embedded/games/business/docs |
 
 ---
 
@@ -69,12 +71,15 @@ Restart Claude Code after install.
 ```
 cd <your-project>
 claude
-> /smartmem-init                    # 10-question wizard
+> /smartmem-init                    # asks: type → file checklist → update mode → ...
+> /memory-files list                # confirm the file set
 > /smartmem-lang-init               # pick languages → installs style skills + tech_context
 > /prd magic-link "passwordless login"
 > /tasks magic-link
 > /process
 ```
+
+To see what filled memory looks like before committing, browse [`samples/`](samples/) — 10 disciplines, real engineering voice, no marketing fluff.
 
 That's it.
 

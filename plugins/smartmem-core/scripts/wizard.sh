@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
-# smartmem wizard (bash) — minimal port. For full features (json-merge, prepend-once with marker logic) prefer wizard.ps1.
+# smartmem wizard (bash). Most logic delegates to python heredocs; PowerShell version is canonical.
 # Usage: bash wizard.sh --config '<json>' --path <project-dir> [--update] [--overlay <name>]
 set -euo pipefail
 
-CONFIG=""
-PATH_ARG=""
-UPDATE=0
-OVERLAY=""
+CONFIG=""; PATH_ARG=""; UPDATE=0; OVERLAY=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --config)  CONFIG="$2"; shift 2 ;;
@@ -22,121 +19,227 @@ done
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 TODAY="$(date +%Y-%m-%d)"
 
-# parse config via python (universally available enough for our targets)
-read NAME DESCRIPTION TYPE TIER HOOKMODE CAVEMAN MEMLANG AUTOMEM < <(python3 - <<PY
-import json,sys
-c=json.loads('''$CONFIG''')
-print(c.get('name',''), c.get('description',''), c.get('type',''), c.get('modelTier','balanced'), c.get('hookMode','full'), c.get('caveman','off'), c.get('memoryLanguage','en'), c.get('autoMemory','keep'))
-PY
-)
-BASE_MANIFEST="templates/manifest.json"
-[ "$MEMLANG" = "he" ] && BASE_MANIFEST="templates/manifest_he.json"
-AUTOMEM_ENABLED="true"
-[ "$AUTOMEM" = "off" ] && AUTOMEM_ENABLED="false"
+export SMARTMEM_CFG="$CONFIG"
+export SMARTMEM_PATH="$PATH_ARG"
+export SMARTMEM_PLUGIN_ROOT="$PLUGIN_ROOT"
+export SMARTMEM_TODAY="$TODAY"
+export SMARTMEM_OVERLAY="$OVERLAY"
+export SMARTMEM_UPDATE="$UPDATE"
 
-case "$TIER" in
-  frugal)  M_FIN=haiku;  M_TT=haiku;  M_EXP=haiku;  M_PLAN=haiku;  M_REV=haiku ;;
-  premium) M_FIN=sonnet; M_TT=sonnet; M_EXP=sonnet; M_PLAN=opus;   M_REV=sonnet ;;
-  *)       M_FIN=haiku;  M_TT=haiku;  M_EXP=sonnet; M_PLAN=opus;   M_REV=sonnet ;;
-esac
+python3 - <<'PY'
+import json, os, re, sys
+from pathlib import Path
 
-render() {
-  sed -e "s|{{name}}|$NAME|g" \
-      -e "s|{{description}}|$DESCRIPTION|g" \
-      -e "s|{{type}}|$TYPE|g" \
-      -e "s|{{date}}|$TODAY|g" \
-      -e "s|{{modelTier}}|$TIER|g" \
-      -e "s|{{hookMode}}|$HOOKMODE|g" \
-      -e "s|{{caveman}}|$CAVEMAN|g" \
-      -e "s|{{memoryLanguage}}|$MEMLANG|g" \
-      -e "s|{{autoMemory}}|$AUTOMEM|g" \
-      -e "s|{{autoMemoryEnabled}}|$AUTOMEM_ENABLED|g" \
-      -e "s|{{MODEL_FINALIZER}}|$M_FIN|g" \
-      -e "s|{{MODEL_TASK_TRACKER}}|$M_TT|g" \
-      -e "s|{{MODEL_EXPLORER}}|$M_EXP|g" \
-      -e "s|{{MODEL_PLANNER}}|$M_PLAN|g" \
-      -e "s|{{MODEL_REVIEWER}}|$M_REV|g"
+cfg = json.loads(os.environ['SMARTMEM_CFG'])
+target = Path(os.environ['SMARTMEM_PATH'])
+plugin_root = Path(os.environ['SMARTMEM_PLUGIN_ROOT'])
+today = os.environ['SMARTMEM_TODAY']
+overlay = os.environ['SMARTMEM_OVERLAY']
+update_flag = os.environ['SMARTMEM_UPDATE'] == '1'
+
+REGISTRY = {
+  'project_brief':       ('Project brief',        'What this project is and why it exists.'),
+  'product_context':     ('Product context',      'Users, problems being solved, success criteria.'),
+  'design_goals':        ('Design goals',         'Priorities and trade-off rules.'),
+  'system_requirements': ('System requirements',  'Functional (FR-) and non-functional (NFR-) requirements.'),
+  'glossary':            ('Glossary',             'Project-specific terms.'),
+  'architecture':        ('Architecture',         'High-level system architecture and component layout.'),
+  'code_structure':      ('Code structure',       'Where code lives in the repo.'),
+  'system_patterns':     ('System patterns',      'Code conventions and recurring patterns.'),
+  'tech_context':        ('Tech context',         'Stack, versions, build/test/run commands.'),
+  'db_structure':        ('Database structure',   'Schema, migrations, key tables.'),
+  'ui_structure':        ('UI structure',         'Routes, screens, component tree, design system.'),
+  'api_surface':         ('API surface',          'Endpoints, contracts, RPC methods.'),
+  'active_context':      ('Active context',       'Current focus, recent decisions, open threads.'),
+  'tasks':               ('Tasks',                'Open / blocked / done.'),
+  'progress':            ('Progress',             'Append-only milestone log.'),
+  'commands':            ('Commands',             'Frequently-used shell command bookmarks.'),
+  'decisions':           ('Decisions',            'Local mirror of docs/DECISIONS.md (ADR-lite).'),
+  'stakeholders':        ('Stakeholders',         'Who cares, what they care about, escalation paths.'),
+  'processes':           ('Processes',            'Business workflows / BPMN summaries.'),
+  'slas':                ('SLAs',                 'Service-level agreements and timeliness targets.'),
+  'datasets':            ('Datasets',             'Source data, versions, splits.'),
+  'experiments':         ('Experiments',          'Recent experiment register.'),
+  'model_registry':      ('Model registry',       'Production + candidate models.'),
 }
 
-apply_file() {
-  local src="$1" dst="$2" merge="$3" marker="${4:-}"
-  mkdir -p "$(dirname "$dst")"
-  if [ "$merge" = "create-only" ] && [ -e "$dst" ]; then
-    echo "skip (exists): $dst"; return
-  fi
-  if [ "$merge" = "prepend-once" ] && [ -e "$dst" ] && grep -qF "$marker" "$dst"; then
-    echo "skip (marker present): $dst"; return
-  fi
-  if [ "$merge" = "append-once" ] && [ -e "$dst" ] && grep -qF "$marker" "$dst"; then
-    echo "skip (marker present): $dst"; return
-  fi
-  local content
-  content="$(render < "$src")"
-  case "$merge" in
-    prepend-once)
-      { printf '%s\n%s\n<!-- smartmem:end -->\n\n' "$marker" "$content"; cat "$dst" 2>/dev/null || true; } > "$dst.tmp"
-      mv "$dst.tmp" "$dst"
-      echo "prepended: $dst" ;;
-    append-once)
-      printf '\n%s\n' "$content" >> "$dst"
-      echo "appended: $dst" ;;
-    json-merge)
-      if [ -e "$dst" ]; then
-        python3 - "$dst" <<PY
-import json,sys
-old=json.load(open(sys.argv[1]))
-new=json.loads('''$content''')
-old.setdefault('permissions',{}).setdefault('allow',[])
-old['permissions']['allow']=sorted(set(old['permissions']['allow']+new.get('permissions',{}).get('allow',[])))
-e=old.setdefault('env',{}); e.update({k:v for k,v in new.get('env',{}).items() if k not in e})
-json.dump(old, open(sys.argv[1],'w'), indent=2)
-PY
-        echo "json-merged: $dst"
-      else
-        printf '%s' "$content" > "$dst"
-        echo "wrote: $dst"
-      fi ;;
-    *)
-      printf '%s' "$content" > "$dst"
-      echo "wrote: $dst" ;;
-  esac
+TYPE_DEFAULTS = {
+  'software-library':  ['project_brief','design_goals','architecture','code_structure','system_patterns','tech_context','active_context','tasks','decisions','commands','progress'],
+  'cli-tool':          ['project_brief','design_goals','architecture','code_structure','system_patterns','tech_context','active_context','tasks','decisions','commands','progress'],
+  'fullstack-web':     ['project_brief','product_context','design_goals','system_requirements','architecture','code_structure','system_patterns','tech_context','db_structure','ui_structure','api_surface','active_context','tasks','decisions','commands','progress'],
+  'business-workflow': ['project_brief','product_context','design_goals','system_requirements','stakeholders','processes','slas','active_context','tasks','decisions','progress'],
+  'data-ml':           ['project_brief','design_goals','architecture','datasets','experiments','model_registry','tech_context','system_patterns','active_context','tasks','decisions','commands','progress'],
+  'other':             ['project_brief','design_goals','active_context','tasks','decisions','progress'],
 }
 
-apply_manifest() {
-  local manifest="$1" tpl_root="$2"
-  [ -f "$manifest" ] || return 0
-  python3 - "$manifest" <<'PY' | while IFS=$'\t' read -r src dst merge marker; do
-import json,sys
-m=json.load(open(sys.argv[1]))
-for f in m['files']:
-  print('\t'.join([f['src'], f['dst'], f['merge'], f.get('marker','')]))
-PY
-    apply_file "$tpl_root/$src" "$PATH_ARG/$dst" "$merge" "$marker"
-  done
+ALWAYS_DEFAULT = ['active_context','tasks']
+
+ptype = cfg.get('type','other')
+selected = cfg.get('memoryFiles') or TYPE_DEFAULTS.get(ptype, TYPE_DEFAULTS['other'])
+always = cfg.get('alwaysLoaded') or [f for f in ALWAYS_DEFAULT if f in selected]
+update_mode = cfg.get('updateMode','auto')
+mem_lang = cfg.get('memoryLanguage','en')
+auto_mem = cfg.get('autoMemory','keep')
+tier = cfg.get('modelTier','balanced')
+
+models = {
+  'frugal':  dict(F='haiku',T='haiku',E='haiku',P='haiku',R='haiku'),
+  'premium': dict(F='sonnet',T='sonnet',E='sonnet',P='opus',R='sonnet'),
+}.get(tier, dict(F='haiku',T='haiku',E='sonnet',P='opus',R='sonnet'))
+
+update_rule = ('manual — run `/memory-sync` when ready; nothing writes memory until you approve the proposed diff.'
+               if update_mode == 'manual'
+               else 'automatic — `memory-finalizer` runs on Stop and PreCompact, applying scratch notes without prompting.')
+
+import_lines = ['@memory/MEMORY.md'] + [f'@memory/{f}.md' for f in always if f in selected]
+memory_imports = '\n'.join(import_lines)
+
+vars_ = {
+  '{{name}}': cfg.get('name',''),
+  '{{description}}': cfg.get('description',''),
+  '{{type}}': ptype,
+  '{{date}}': today,
+  '{{modelTier}}': tier,
+  '{{hookMode}}': cfg.get('hookMode','full'),
+  '{{caveman}}': cfg.get('caveman','off'),
+  '{{updateMode}}': update_mode,
+  '{{updateModeRule}}': update_rule,
+  '{{memoryImports}}': memory_imports,
+  '{{memoryFilesJson}}': json.dumps(selected),
+  '{{alwaysLoadedJson}}': json.dumps(always),
+  '{{memoryLanguage}}': mem_lang,
+  '{{autoMemory}}': auto_mem,
+  '{{autoMemoryEnabled}}': 'false' if auto_mem == 'off' else 'true',
+  '{{MODEL_FINALIZER}}': models['F'],
+  '{{MODEL_TASK_TRACKER}}': models['T'],
+  '{{MODEL_EXPLORER}}': models['E'],
+  '{{MODEL_PLANNER}}': models['P'],
+  '{{MODEL_REVIEWER}}': models['R'],
 }
 
-echo "smartmem wizard: project=$NAME type=$TYPE tier=$TIER hookMode=$HOOKMODE caveman=$CAVEMAN memoryLang=$MEMLANG"
-# Overlay first so specialized files win over generic base (create-only semantics).
-if [ -n "$OVERLAY" ]; then
-  OV_ROOT="$(dirname "$PLUGIN_ROOT")/smartmem-$OVERLAY/templates"
-  if [ -d "$OV_ROOT" ]; then
-    apply_manifest "$OV_ROOT/manifest.json" "$OV_ROOT"
-  else
-    echo "overlay not found: $OVERLAY"
-  fi
-fi
-apply_manifest "$PLUGIN_ROOT/$BASE_MANIFEST" "$PLUGIN_ROOT/templates"
+def render(s):
+  if not s: return ''
+  for k, v in vars_.items(): s = s.replace(k, str(v))
+  return s
 
-case "$CAVEMAN" in
+def apply_file(src, dst, merge, marker=''):
+  dst.parent.mkdir(parents=True, exist_ok=True)
+  exists = dst.exists()
+  raw = src.read_text(encoding='utf-8') if src.exists() else ''
+  content = render(raw)
+  if merge == 'create-only':
+    if exists: print(f'skip (exists): {dst}'); return
+    dst.write_text(content, encoding='utf-8'); print(f'wrote: {dst}'); return
+  if merge == 'prepend-once':
+    if exists:
+      cur = dst.read_text(encoding='utf-8')
+      if marker in cur: print(f'skip (marker present): {dst}'); return
+      dst.write_text(f'{marker}\n{content}\n<!-- smartmem:end -->\n\n' + cur, encoding='utf-8')
+      print(f'prepended: {dst}'); return
+    dst.write_text(f'{marker}\n{content}\n<!-- smartmem:end -->\n', encoding='utf-8')
+    print(f'wrote: {dst}'); return
+  if merge == 'append-once':
+    if exists:
+      cur = dst.read_text(encoding='utf-8')
+      if marker in cur: print(f'skip (marker present): {dst}'); return
+      with dst.open('a', encoding='utf-8') as fh: fh.write('\n' + content)
+      print(f'appended: {dst}'); return
+    dst.write_text(content, encoding='utf-8'); print(f'wrote: {dst}'); return
+  if merge == 'json-merge':
+    new = json.loads(content)
+    if exists:
+      try:
+        old = json.loads(dst.read_text(encoding='utf-8'))
+        if 'permissions' in new and 'allow' in new['permissions']:
+          old.setdefault('permissions', {}).setdefault('allow', [])
+          old['permissions']['allow'] = sorted(set(old['permissions']['allow'] + new['permissions']['allow']))
+        if 'env' in new:
+          e = old.setdefault('env', {})
+          for k, v in new['env'].items():
+            if k not in e: e[k] = v
+        dst.write_text(json.dumps(old, indent=2), encoding='utf-8')
+        print(f'json-merged: {dst}'); return
+      except Exception:
+        print(f'json-merge failed, leaving alone: {dst}'); return
+    dst.write_text(content, encoding='utf-8'); print(f'wrote: {dst}'); return
+  if merge == 'overwrite-runtime':
+    if exists:
+      try:
+        old = json.loads(dst.read_text(encoding='utf-8'))
+        new = json.loads(content)
+        for k, v in new.items():
+          if k not in old or update_flag: old[k] = v
+        dst.write_text(json.dumps(old, indent=2), encoding='utf-8')
+        print(f'merged-runtime: {dst}'); return
+      except Exception: pass
+    dst.write_text(content, encoding='utf-8'); print(f'wrote: {dst}'); return
+  # default
+  if exists and not update_flag: print(f'skip (exists): {dst}'); return
+  dst.write_text(content, encoding='utf-8'); print(f'wrote: {dst}')
+
+def apply_manifest(manifest_path, tpl_root):
+  if not manifest_path.exists(): return
+  m = json.loads(manifest_path.read_text(encoding='utf-8'))
+  for f in m['files']:
+    apply_file(tpl_root / f['src'], target / f['dst'], f['merge'], f.get('marker',''))
+
+def gen_memory_file(name):
+  dst = target / 'memory' / f'{name}.md'
+  if dst.exists(): print(f'skip (exists): {dst}'); return
+  title, purpose = REGISTRY.get(name, (name.replace('_',' ').title(), ''))
+  body = f'# {title}\n'
+  if purpose: body += f'<!-- Purpose: {purpose} -->\n'
+  body += '\n'
+  dst.parent.mkdir(parents=True, exist_ok=True)
+  dst.write_text(body, encoding='utf-8'); print(f'wrote: {dst}')
+
+def gen_index():
+  dst = target / 'memory' / 'MEMORY.md'
+  if dst.exists(): print(f'skip (exists): {dst}'); return
+  lines = ['# Memory index','','## Always-loaded']
+  if not always:
+    lines.append('_(none — only this index is always-loaded)_')
+  else:
+    for f in always:
+      _, p = REGISTRY.get(f, (f, ''))
+      lines.append(f'- [{f}]({f}.md)' + (f' — {p}' if p else ''))
+  lines.append('')
+  lines.append('## On demand')
+  rest = [f for f in selected if f not in always]
+  if not rest:
+    lines.append('_(none yet — add with `/memory-files add <name>`)_')
+  else:
+    for f in rest:
+      _, p = REGISTRY.get(f, (f, ''))
+      lines.append(f'- [{f}]({f}.md)' + (f' — {p}' if p else ''))
+  lines.append('')
+  dst.parent.mkdir(parents=True, exist_ok=True)
+  dst.write_text('\n'.join(lines) + '\n', encoding='utf-8'); print(f'wrote: {dst}')
+
+base_manifest = 'templates/manifest_he.json' if mem_lang == 'he' else 'templates/manifest.json'
+
+print(f"smartmem wizard: project={cfg.get('name')} type={ptype} tier={tier} hookMode={vars_['{{hookMode}}']} updateMode={update_mode} files={len(selected)}")
+
+if overlay:
+  ov_root = plugin_root.parent / f'smartmem-{overlay}' / 'templates'
+  if ov_root.exists():
+    apply_manifest(ov_root / 'manifest.json', ov_root)
+  else:
+    print(f'overlay not found: {overlay}')
+
+apply_manifest(plugin_root / base_manifest, plugin_root / 'templates')
+
+for f in selected:
+  gen_memory_file(f)
+gen_index()
+
+print()
+print(f"smartmem ready. Selected memory files: {', '.join(selected)}")
+print(f"Always-loaded:                          {', '.join(always)}")
+print(f"Update mode:                            {update_mode}")
+PY
+
+case "$(echo "$CONFIG" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("caveman","off"))')" in
   caveman-plugin) echo; echo "Caveman concise mode selected. Run:"; echo "  claude plugin marketplace add JuliusBrussee/caveman"; echo "  claude plugin install caveman@caveman" ;;
   our-concise)    echo; echo "Our-concise mode: the 'concise' skill from smartmem-core is now active." ;;
 esac
-
-cat <<EOF
-
-smartmem ready. Next:
-  /status        - briefing
-  /prd <slug>    - draft a feature PRD
-  /tasks <slug>  - expand PRD into tasks
-  /process       - work the next task
-EOF

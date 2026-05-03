@@ -7,7 +7,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # smartmem-init
 
-You are running the smartmem first-run wizard. Goal: bootstrap or non-destructively upgrade the current project.
+You are running the smartmem first-run wizard. Goal: bootstrap or non-destructively upgrade the current project. The new philosophy is **pick the file set, do not pre-fill content** — memory files start empty (just title + purpose stub) and grow as the user works.
 
 ## Step 1 — detect
 
@@ -21,47 +21,50 @@ If `.claude/smartmem/v1/config.json` exists → call this an **upgrade** run; sk
 
 ## Step 2 — interactive prompts
 
-Use the AskUserQuestion tool for each. Save answers as you go.
+Use AskUserQuestion. Save answers as you go.
 
-1. **Project type** — `software-library` / `fullstack-web` / `business-workflow` / `data-ml` / `cli-tool` / `other (custom)`
-2. **Project name** — short slug (default: directory name)
-3. **One-line description**
-4. **Model tier per role** — single question with three tiers:
-   - frugal: all haiku
-   - balanced (recommended): finalizer/task-tracker=haiku, explorer/reviewer=sonnet, planner=opus
-   - premium: all sonnet+ (planner=opus)
-5. **hookMode** — `off` / `guard` / `full` (recommended)
-6. **Caveman concise mode** — `caveman-plugin` / `our-concise` / `off`
-7. **Memory language** — `en` (recommended, default) / `he` / other.
-   **Important UX note:** strongly recommend keeping memory in English even if the user is chatting with Claude in another language. English memory files are ~30-50% fewer tokens than equivalent Hebrew/Arabic/CJK content, and Claude reasons equally well over English memory regardless of conversation language.
-8. **Auto-memory** — `keep` (default, recommended) / `off` / `mirror`.
-   Claude Code has its own machine-local auto-memory at `~/.claude/projects/<git-root>/memory/MEMORY.md`. Two systems can coexist:
-   - `keep`: leave Claude's auto-memory on. smartmem owns team-shared durable; auto-memory keeps per-machine learning.
-   - `off`: writes `autoMemoryEnabled: false` into `.claude/settings.json` so Claude won't read/write auto-memory in this repo.
-   - `mirror`: (experimental) finalizer reads auto-memory on each pass and promotes team-shareable facts (build commands, decisions) into smartmem.
-   See `docs/guide/09-auto-memory.md`.
-9. **Install language pack now?** — yes/no. If yes, after the wizard completes, automatically invoke `smartmem-lang-init`.
-10. **MCP servers to register** — optional list, can skip
+1. **Project type** — `software-library` / `fullstack-web` / `business-workflow` / `data-ml` / `cli-tool` / `other`.
+2. **Project name** — short slug (default: directory name).
+3. **One-line description**.
+4. **Pick memory files** — multi-select. Show the type-default checklist pre-checked (see registry below). User can uncheck or add custom names. Tell them: "Each file starts empty with just a title; you fill it as you work. You can add or remove files later with `/memory-files add|remove`."
+   - Type defaults:
+     - `software-library` / `cli-tool`: project_brief, design_goals, architecture, code_structure, system_patterns, tech_context, active_context, tasks, decisions, commands, progress
+     - `fullstack-web`: + product_context, system_requirements, db_structure, ui_structure, api_surface
+     - `business-workflow`: project_brief, product_context, design_goals, system_requirements, stakeholders, processes, slas, active_context, tasks, decisions, progress
+     - `data-ml`: project_brief, design_goals, architecture, datasets, experiments, model_registry, tech_context, system_patterns, active_context, tasks, decisions, commands, progress
+5. **Always-loaded files** — which of the chosen files should be `@`-imported in CLAUDE.md so they live in every session's context. Default: `active_context`, `tasks`. Recommend keeping this small (≤4 files).
+6. **Update mode** — `auto` (recommended, default) / `manual`.
+   - `auto`: `memory-finalizer` runs on Stop and PreCompact, applying scratch notes without prompting.
+   - `manual`: nothing writes memory until you run `/memory-sync`; finalizer shows a diff and asks before writing.
+7. **Model tier** — `frugal` / `balanced` (recommended) / `premium`.
+8. **hookMode** — `off` / `guard` / `full` (recommended).
+9. **Caveman concise mode** — `caveman-plugin` / `our-concise` / `off`.
+10. **Memory language** — `en` (recommended) / `he` / other. Strongly recommend `en` even when chatting in another language (saves 30-50% tokens).
+11. **Auto-memory** — `keep` (default) / `off` / `mirror`. See `docs/guide/09-auto-memory.md`.
+12. **Install language pack now?** — yes/no. If yes, invoke `smartmem-lang-init` after.
 
 ## Step 3 — render
 
-Run the wizard script with the collected params:
+Run the wizard with the collected params:
 - Windows: `pwsh -NoProfile -File ${CLAUDE_PLUGIN_ROOT}/scripts/wizard.ps1 -ConfigJson '<json>' -Path "$CLAUDE_PROJECT_DIR"`
 - Unix: `bash ${CLAUDE_PLUGIN_ROOT}/scripts/wizard.sh --config '<json>' --path "$CLAUDE_PROJECT_DIR"`
 
+`<json>` must include: `name`, `type`, `description`, `modelTier`, `hookMode`, `caveman`, `memoryLanguage`, `autoMemory`, `updateMode`, `memoryFiles[]`, `alwaysLoaded[]`.
+
 The wizard:
-- Creates `memory/`, `.claude/smartmem/v1/`, `docs/` (if missing)
-- Renders templates from the chosen overlay (substituting `{{name}}`, `{{description}}`, `{{MODEL_*}}`, etc.)
-- Writes `.claude/smartmem/v1/config.json` (the durable wizard answers)
-- Updates root `CLAUDE.md` with `@imports` (non-destructive: prepends a marked block, never overwrites)
-- Updates `.claude/settings.json` with permission scoping for `.claude/smartmem/**`
+- Creates `memory/`, `.claude/smartmem/v1/`, `docs/` (if missing).
+- Generates `memory/<name>.md` for each chosen file (just `# Title` + purpose comment — empty body).
+- Generates `memory/MEMORY.md` index based on the chosen file set.
+- Writes `.claude/smartmem/v1/config.json` (the durable wizard answers).
+- Renders root `CLAUDE.md` (non-destructive: prepends a marked block) with `@`-imports for the always-loaded files and the concise + hierarchical-memory + update-mode rules baked in.
+- Updates `.claude/settings.json` with permission scoping for `.claude/smartmem/**`.
 
 ## Step 4 — verify and brief
 
 After rendering:
-1. Read back the new `memory/MEMORY.md` and `.claude/smartmem/v1/active_context.md`
-2. Print a one-screen briefing: what was created, what the user should do next (`/status`, `/prd`, etc.)
+1. Read back `memory/MEMORY.md` and the root `CLAUDE.md` smartmem block.
+2. Print a one-screen briefing: chosen files, always-loaded set, update mode, what to do next (`/status`, `/memory-files list`, `/prd <slug>`).
 3. If `caveman-plugin` was chosen, print the install command (do not auto-install).
-4. Spawn `memory-finalizer` once with a synthetic note `MEMORY_NOTES: project initialized via smartmem-init` so the event-log has a first entry.
+4. Append a one-line `MEMORY_NOTES: project initialized via smartmem-init (<date>)` block to `.claude/smartmem/v1/scratch.md` so the next finalizer run logs the bootstrap event.
 
 Never overwrite existing `memory/*.md` or `docs/*.md`. Only seed when absent.

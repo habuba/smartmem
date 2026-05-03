@@ -1,7 +1,7 @@
 {
   "name": "smartmem",
   "description": "Hierarchical smart memory + harness initializer for Claude Code projects.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "owner": { "name": "smartmem" },
   "plugins": [
     { "name": "smartmem-core",       "source": "./plugins/smartmem-core",       "description": "Base memory schema, finalizer agent, hooks, wizard, slash commands." },

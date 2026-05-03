@@ -1,19 +1,20 @@
 # Active context
 
 ## Now
-- v0.3.0 shipped. Full plugin family + 18-file memory schema + 6 language packs + Hebrew memory + auto-memory coexistence is live at https://github.com/habuba/smartmem.
-- Repo dogfoods itself: real content in all 18 memory files (not template stubs).
-- Awaiting first external user end-to-end validation.
+- v0.4.0 in flight. Wizard redesigned to ask file-checklist + update-mode rather than seeding content. Memory files now start as `# Title` + purpose stubs and grow as the user works.
+- New `/memory-files add|remove|rename|list` command shipped.
+- 10 sample projects added under `samples/` showing what filled memory looks like across disciplines.
+- Dogfood memory files stripped back to stubs; samples carry the realistic examples instead.
 
 ## Open threads
-- bash hook scripts only ship for `session-start` and `block-secrets`; the other 4 (`post-compact`, `stop-finalize`, `subagent-contract-audit`) are PowerShell-only. Need bash equivalents for full Linux/macOS parity.
-- `hooks.json` references `pwsh` directly. Need an auto-detect (or split `hooks.json` per platform) so Linux users don't have to hand-edit.
-- `/smartmem-new-template` writes to the smartmem source repo, not user repos. Need clearer docs explaining this is an authoring tool.
-- `mirror` mode for auto-memory is experimental — heuristic for "team-shareable vs per-machine" needs tightening.
+- bash hook scripts only ship for `session-start` and `block-secrets`. Need bash equivalents for `post-compact`, `stop-finalize`, `subagent-contract-audit`.
+- `hooks.json` references `pwsh` directly. Need an auto-detect or per-platform split.
+- Manual updateMode flow needs end-to-end smoke test (approval prompt, partial-apply, scratch retention).
+- `mirror` autoMemory mode heuristic still rough — team-shareable vs per-machine signal not crisp.
 
 ## Recently decided
-- 2026-05-01: Coexist with Claude Code auto-memory, don't replace it. v0.3.0 wizard option `autoMemory: keep | off | mirror`.
-- 2026-05-01: Default memory language is English even when chatting in another language (30-50% token saving). Hebrew templates ship in v0.2.0+ for users who explicitly want them.
-- 2026-05-01: 18-file memory schema (granular split). Each file has a single purpose and a single writer.
-- 2026-05-01: Single-writer invariant — only `memory-finalizer` writes memory. SubagentStop hook audits compliance.
-- 2026-05-01: Distribution = plugin marketplace primary + clone+symlink fallback for restricted envs.
+- 2026-05-03: Wizard no longer pre-fills memory content. New flow: pick type → file checklist → update mode (auto/manual). Files are stubs until the user (or finalizer) writes them.
+- 2026-05-03: New `/memory-files` command for adding, removing, renaming memory files post-init. Three sources of truth (MEMORY.md / config.json / files-on-disk) must stay in sync.
+- 2026-05-03: Other agents (planner/reviewer/explorer) now append `MEMORY_NOTES:` to `.claude/smartmem/v1/scratch.md` instead of inline. task-tracker remains the one exception (writes `memory/tasks.md` directly).
+- 2026-05-01: Coexist with Claude Code auto-memory. `autoMemory: keep | off | mirror`.
+- 2026-05-01: Default memory language is English even when chatting in another language (30-50% token saving).

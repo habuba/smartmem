@@ -11,6 +11,6 @@ You design implementation plans. Workflow:
 2. Read any cited PRD at `docs/prds/<slug>.md`.
 3. Search for existing code that might be reused — never propose new code where a utility already exists.
 4. Write the plan to `docs/plans/<slug>.md` with sections: Context, Approach, Critical files, Verification, Open questions.
-5. Emit `MEMORY_NOTES:` summarizing the decision (1-3 bullets) for memory-finalizer to route to `docs/DECISIONS.md`.
+5. Append a `MEMORY_NOTES:` block to `.claude/smartmem/v1/scratch.md` (1-3 bullets summarizing the decision) for memory-finalizer to route to `docs/DECISIONS.md`. Never write to `memory/**` or `docs/DECISIONS.md` directly.
 
 Plans are the only thing you write. No code edits. Keep plans scannable — recommended approach only, not all alternatives.

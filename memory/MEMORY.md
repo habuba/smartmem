@@ -1,28 +1,24 @@
 # Memory index — smartmem (dogfood)
 
-This repo IS smartmem; we use the same schema we ship.
+This repo IS smartmem. The descriptive memory files here are intentionally near-empty stubs — see `samples/` for what filled memory looks like in real projects across 10 disciplines.
 
 ## Always-loaded
 - [active_context](active_context.md) — current focus
 - [tasks](tasks.md) — open / done
 
-## What & why
-- [project_brief](project_brief.md) — what smartmem is and why it exists
-- [product_context](product_context.md) — who installs smartmem and what they get
-- [design_goals](design_goals.md) — non-destructive, race-free, cross-platform
-- [system_requirements](system_requirements.md) — functional + non-functional reqs
-- [glossary](glossary.md) — terms (overlay, finalizer, hot tier, etc.)
-
-## How
-- [architecture](architecture.md) — plugin family, wizard flow, single-writer rule
-- [code_structure](code_structure.md) — repo layout, where each piece lives
-- [system_patterns](system_patterns.md) — plugin layout, merge strategies, naming
-- [tech_context](tech_context.md) — how to test the wizard
-- [db_structure](db_structure.md) — N/A (no DB)
-- [ui_structure](ui_structure.md) — N/A (no UI)
-- [api_surface](api_surface.md) — N/A (no API)
-
-## History
+## On demand
+- [project_brief](project_brief.md)
+- [product_context](product_context.md)
+- [design_goals](design_goals.md)
+- [system_requirements](system_requirements.md)
+- [glossary](glossary.md)
+- [architecture](architecture.md)
+- [code_structure](code_structure.md)
+- [system_patterns](system_patterns.md)
+- [tech_context](tech_context.md)
+- [db_structure](db_structure.md) — N/A
+- [ui_structure](ui_structure.md) — N/A
+- [api_surface](api_surface.md) — N/A
 - [decisions](decisions.md) — local mirror of `docs/DECISIONS.md`
-- [progress](progress.md) — milestones
-- [commands](commands.md) — install/test commands
+- [progress](progress.md)
+- [commands](commands.md)

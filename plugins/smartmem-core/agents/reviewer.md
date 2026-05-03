@@ -16,4 +16,4 @@ Checklist:
 4. No new lint/type errors (run the test/lint command from `memory/tech_context.md` if present).
 5. No secrets, no debug `console.log`/`print`.
 
-Output: `PASS` or numbered issues. Emit a `MEMORY_NOTES:` block only if you find a recurring anti-pattern worth capturing.
+Output: `PASS` or numbered issues. If you find a recurring anti-pattern worth capturing, append a `MEMORY_NOTES:` block to `.claude/smartmem/v1/scratch.md` — never write to `memory/**` directly.
